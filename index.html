@@ -1,0 +1,559 @@
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reset.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/theme/simple.min.css"
+      id="theme"
+    />
+    <link rel="stylesheet" href="highlight-phpstorm-light-theme.css" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&family=Roboto+Mono&family=Roboto:wght@400;700&display=swap"
+    />
+    <style>
+      :root {
+        --r-main-font: 'Roboto', 'Noto Color Emoji', sans-serif;
+        --r-heading-font: 'Roboto', 'Noto Color Emoji', sans-serif;
+        --r-code-font: 'Roboto Mono', 'Noto Color Emoji', monospace;
+        --r-block-margin: 10px;
+      }
+      .reveal pre {
+        font-size: 0.5em;
+      }
+      .nohighlight {
+        padding: 1em !important;
+      }
+      .reveal .hljs {
+        min-height: auto;
+      }
+      td.hljs-ln-code {
+        white-space: pre;
+      }
+      .reveal h1,
+      .reveal h2,
+      .reveal h3,
+      .reveal h4,
+      .reveal h5,
+      .reveal h6,
+      .reveal pre,
+      .reveal p,
+      .reveal img {
+        margin: 0 var(--r-block-margin) calc(var(--r-block-margin) * 2);
+      }
+      .reveal pre {
+        width: auto;
+      }
+
+      .reveal .r-stack > * {
+        margin: 0;
+      }
+      .horizontal {
+        display: flex;
+        width: 100%;
+        justify-content: space-between;
+      }
+      .horizontal > * {
+        flex-grow: 1;
+      }
+      .horizontal-half > * {
+        flex-grow: 0 !important;
+        width: calc(50% - var(--r-block-margin) * 2) !important;
+      }
+
+      li {
+        font-size: 30px;
+      }
+    </style>
+    <title>SOLID</title>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section>
+          <h2>Работа с файлами</h2>
+        </section>
+
+        <section>
+          <h3>Single responsibility</h3>
+          <p>Каждый класс должен отвечать только за одну операцию</p>
+        </section>
+
+        <section>
+          <h3>Fopen</h3>
+          <p>
+            Для открытия файлов в PHP определена функция fopen(). Она имеет
+            следующее определение: resource fopen(string $filename, string
+            $mode). Первый параметр $filename представляет путь к файлу, а
+            второй - режим открытия. В зависимости от цели открытия и типа файла
+            данный параметр может принимать следующие значения:
+          </p>
+        </section>
+
+        <section>
+          <h3>fopen modes</h3>
+          <ul>
+            <li>
+              'r': файл открывается только для чтения. Если файла не существует,
+              возвращает false
+            </li>
+            <li>
+              'r+': файл открывается только для чтения с возможностью записи.
+              Если файла не существует, возвращает false
+            </li>
+            <li>
+              'w': файл открывается для записи. Если такой файл уже существует,
+              то он перезаписывается, если нет - то он создается
+            </li>
+            <li>
+              'w+': файл открывается для записи с возможностью чтения. Если
+              такой файл уже существует, то он перезаписывается, если нет - то
+              он создается
+            </li>
+            <li>
+              'a': файл открывается для записи. Если такой файл уже существует,
+              то данные записываются в конец файла, а старые данные остаются.
+              Если файл не существует, то он создается
+            </li>
+            <li>
+              'a+': файл открывается для чтения и записи. Если файл уже
+              существует, то данные дозаписываются в конец файла. Если файла
+              нет, то он создается
+            </li>
+          </ul>
+        </section>
+
+        <section>
+          <h3>fclose</h3>
+          <p>
+            Результатом функции fopen будет дескриптор файла. Этот дескриптор
+            используется для операций с файлом и для его закрытия. После
+            окончания работы файл надо закрыть с помощью функции fclose(),
+            которая принимает в качестве параметра дескриптор файла.
+          </p>
+        </section>
+
+        <section>
+          <h3>Пример чтения</h3>
+          <pre>
+            <code class="language-php" data-trim data-line-numbers="">
+              $fd = fopen("form.php", 'r') or die("не удалось открыть файл");
+              while(!feof($fd))
+              {
+                  $str = htmlentities(fgets($fd));
+                  echo $str;
+              }
+              fclose($fd);
+            </code>
+          </pre>
+          <p>
+            Чтобы проследить окончание файла, используется функция feof(),
+            которая возвращает true при завершении файла.
+          </p>
+        </section>
+
+        <section>
+          <h3>Полное чтение file_get_contents</h3>
+          <pre>
+            <code class="language-php" data-trim data-line-numbers="">
+              $str = file_get_contents("form.php");
+              echo $str;
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h3>Поблочное считывание</h3>
+          <pre>
+            <code class="language-php" data-trim data-line-numbers="">
+              $fd = fopen("form.php", 'r');
+              while(!feof($fd))
+              {
+                  $str = htmlentities(fread($fd, 600));
+                  echo $str;
+              }
+              fclose($fd);
+            </code>
+          </pre>
+          <p>
+            Функция fread() принимает два параметра: дескриптор считываемого
+            файла и количество считываемых байтов. При считывании блока
+            указатель в файле становится в конец этого блока. И также с помощью
+            функции feof() можно отследить завершение файла.
+          </p>
+        </section>
+
+        <section>
+          <h3>Запись файла</h3>
+          <pre>
+            <code class="language-php" data-trim data-line-numbers="">
+              $fd = fopen("hello.txt", 'w');
+              $str = "Привет мир";
+              fwrite($fd, $str);
+              fclose($fd);
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h3>Работа с указателем файла</h3>
+          <p>
+            При открытии файла для чтения или записи в режиме 'w', указатель в
+            файле помещается в начало. При считывании данных PHP перемещает
+            указатель в файле в конец блока считанных данных. Однако мы также
+            вручную можем управлять указателем в файле и устанавливать его в
+            произвольное место. Для этого надо использовать функцию fseek,
+            которая имеет следующее формальное определение:
+          </p>
+          <pre>
+            <code class="language-php" data-trim data-line-numbers="">
+              fseek(resource $stream, int $offset, int $whence = SEEK_SET): int
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <p>
+            Параметр $handle представляет дескриптор файла. Параметр $offset -
+            смещение в байтах относительно начала файла, с которого начнется
+            считывание/запись. Третий необязательный параметр задает способ
+            установки смещения. Он может принимать три значения:
+          </p>
+          <ul>
+            <li>
+              SEEK_SET: значение по умолчанию, устанавливает смещение в offset
+              байт относительно начала файла
+            </li>
+            <li>
+              SEEK_CUR: устанавливает смещение в offset байт относительно начала
+              текущей позиции в файле
+            </li>
+            <li>
+              SEEK_END: устанавливает смещение в offset байт от конца файла
+            </li>
+          </ul>
+          <p>
+            В случае удачной установки указателя функция fseek() возвращает 0, а
+            при неудачной установке возвращает -1
+          </p>
+        </section>
+
+        <section>
+          <h3>Пример</h3>
+          <pre>
+            <code class="language-php" data-trim data-line-numbers="">
+              $fd = fopen("hello.txt", 'w+') or die("не удалось открыть файл");
+              $str = "Привет мир!"; // строка для записи
+              fwrite($fd, $str); // запишем строку в начало
+              fseek($fd, 0); // поместим указатель файла в начало
+              fwrite($fd, "Хрю"); // запишем в начало строку
+              fseek($fd, 0, SEEK_END); // поместим указатель в конец
+              fwrite($fd, $str); // запишем в конце еще одну строку
+              fclose($fd);
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h3>Проверка существования файла</h3>
+          <p>
+            file_exists — Проверяет существование указанного файла или каталога
+          </p>
+          <pre>
+            <code class="language-php" data-trim data-line-numbers="">
+              $filename = '/path/to/foo.txt';
+
+              if (file_exists($filename)) {
+                  echo "The file $filename exists";
+              } else {
+                  echo "The file $filename does not exist";
+              }
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h3>Удаление файла</h3>
+          <p>unlink — Удаляет файл</p>
+          <pre>
+            <code class="language-php" data-trim data-line-numbers="">
+              unlink(string $filename, ?resource $context = null): bool
+
+              $fh = fopen('test.html', 'a');
+              fwrite($fh, 'Hello world!');
+              fclose($fh);
+
+              unlink('test.html')
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h3>Работа с архивами в php</h3>
+        </section>
+
+        <section>
+          <p>
+            Прежде чем начать работу с архивом. Нужно явно указать его в
+            composer.json
+          </p>
+          <pre>
+            <code>
+              {
+                "require" : {
+                    "ext-zip": "*"
+                }
+              }
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h3>Добавление файлов в архив</h3>
+          <ul>
+            <li>ZipArchive::CREATE – создавать архив, если он не существует</li>
+            <li>
+              ZipArchive::OVERWRITE – если архив существует, то игнорировать
+              текущее его содержимое т.е. работать как с пустым архивом.
+            </li>
+          </ul>
+          <pre>
+            <code class="language-php" data-trim data-line-numbers="">
+              $zip = new ZipArchive();
+              $zip->open(__DIR__ . '/archive.zip', ZipArchive::CREATE|ZipArchive::OVERWRITE);
+              $zip->addFile(__DIR__ . '/image1.jpg', 'image1.jpg');
+              $zip->addFile(__DIR__ . '/image2.jpg', 'image2.jpg');
+              $zip->close();
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h3>Извлечение архива</h3>
+          <pre>
+            <code class="language-php" data-trim data-line-numbers="">
+              $zip = new ZipArchive();
+              $zip->open(__DIR__ . '/archive.zip');
+              $zip->extractTo(__DIR__);
+              $zip->close();
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h3>Удаления файла из архива</h3>
+          <pre>
+            <code class="language-php" data-trim data-line-numbers="">
+              $zip = new ZipArchive();
+              $zip->open(__DIR__ . '/archive.zip');
+              $zip->deleteName('image2.jpg');
+              $zip->close();
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h3>JSON</h3>
+        </section>
+
+        <section>
+          <p>
+            JSON (англ. JavaScript Object Notation) — текстовый формат обмена
+            данными, основанный на JavaScript. Но при этом формат независим от
+            JS и может использоваться в любом языке программирования.
+          </p>
+        </section>
+
+        <section>
+          <img src="img/json1.jpg" alt="" />
+          <img src="img/json2.jpg" alt="" />
+        </section>
+
+        <section>
+          <p>
+            json_encode($value, $options) – кодирует массив или объект в JSON.
+          </p>
+          <pre>
+            <code class="language-php" data-trim data-line-numbers="">
+              $array = [
+                '1' => 'Значение 1', 
+                '2' => 'Значение 2', 
+                '3' => 'Значение 3', 
+                '4' => 'Значение 4', 
+                '5' => 'Значение 5'
+              ];
+              
+              $json = json_encode($array);
+              echo $json; //{"1":"\u0417\u043d\u0430\u0447\u0435\u043d\u0438\u0435 1","2":"\u0417\u043d\u0430\u0447\u0435\u043d\u0438\u0435 2","3":"\u0417\u043d\u0430\u0447\u0435\u043d\u0438\u0435 3","4":"\u0417\u043d\u0430\u0447\u0435\u043d\u0438\u0435 4","5":"\u0417\u043d\u0430\u0447\u0435\u043d\u0438\u0435 5"}
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <p>
+            Как видно кириллица кодируется, исправляется это добавлением опции
+            JSON_UNESCAPED_UNICODE.
+          </p>
+          <pre>
+            <code class="language-php" data-trim data-line-numbers="">
+              $json = json_encode($array, JSON_UNESCAPED_UNICODE);
+              echo $json; // {"1":"Значение 1","2":"Значение 2","3":"Значение 3","4":"Значение 4","5":"Значение 5"}
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <p>Функция json_decode($json) преобразует строку в объект:</p>
+          <pre>
+            <code class="language-php" data-trim data-line-numbers="">
+              $json = '{"1":"Значение 1","2":"Значение 2","3":"Значение 3","4":"Значение 4","5":"Значение 5"}';
+              $array = json_decode($json);
+              print_r($array);
+            </code>
+          </pre>
+
+          <pre>
+            <code class="language-php" data-trim data-line-numbers="">
+              stdClass Object
+              (
+                  [1] => Значение 1
+                  [2] => Значение 2
+                  [3] => Значение 3
+                  [4] => Значение 4
+                  [5] => Значение 5
+              )
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <p>
+            Если добавить вторым аргументом true, то произойдёт преобразование в
+            массив:
+          </p>
+          <pre>
+            <code class="language-php" data-trim data-line-numbers="">
+              $json = '{"1":"Значение 1","2":"Значение 2","3":"Значение 3","4":"Значение 4","5":"Значение 5"}';
+              $array = json_decode($json, true);
+              print_r($array);
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <p>
+            json_decode() возвращает NULL, если в объекте есть ошибки,
+            посмотреть их можно с помощью функции json_last_error():
+          </p>
+          <pre>
+            <code class="language-php" data-trim data-line-numbers="">
+              $json = '{"1:"Значение 1"}';
+              $array = json_decode($json, true);
+              
+              switch (json_last_error()) {
+                case JSON_ERROR_NONE:
+                  echo 'Ошибок нет';
+                break;
+                case JSON_ERROR_DEPTH:
+                  echo 'Достигнута максимальная глубина стека';
+                break;
+                case JSON_ERROR_STATE_MISMATCH:
+                  echo 'Некорректные разряды или несоответствие режимов';
+                break;
+                case JSON_ERROR_CTRL_CHAR:
+                  echo 'Некорректный управляющий символ';
+                break;
+                case JSON_ERROR_SYNTAX:
+                  echo 'Синтаксическая ошибка, некорректный JSON';
+                break;
+                case JSON_ERROR_UTF8:
+                  echo 'Некорректные символы UTF-8, возможно неверно закодирован';
+                break;
+                default:
+                  echo 'Неизвестная ошибка';
+                break;
+              }
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h3>Сериализация</h3>
+        </section>
+
+        <section>
+          <p>
+            Сериализация — это процесс, в котором принимается часть данных и
+            создаётся хранимое или переносимое представление этих данных.
+          </p>
+        </section>
+
+        <section>
+          <p>
+            Функция serialize() возвращает строковое представление любого
+            значения, которое может быть сохранено в PHP.
+          </p>
+          <p>
+            Функция unserialize() может использовать эту строку для
+            восстановления исходного значения переменной.
+          </p>
+        </section>
+
+        <section>
+          <p>Пример:</p>
+          <pre>
+            <code class="language-php" data-trim data-line-numbers="">
+              class Person {
+                public $name;
+                public $age;
+                public $is_student;
+            
+                public function __construct($name, $age, $is_student) {
+                    $this->name = $name;
+                    $this->age = $age;
+                    $this->is_student = $is_student;
+                }
+              }
+              
+              // Создаем объект класса Person
+              $person = new Person("John", 30, false);
+              
+              // Сериализация объекта
+              $serializedPerson = serialize($person);
+              echo "Сериализованный объект: " . $serializedPerson . "\n";
+              
+              // Десериализация объекта
+              $unserializedPerson = unserialize($serializedPerson);
+              echo "Десериализованный объект:\n";
+              echo "Имя: " . $unserializedPerson->name . "\n";
+              echo "Возраст: " . $unserializedPerson->age . "\n";
+              echo "Студент: " . ($unserializedPerson->is_student ? "Да" : "Нет") . "\n";
+            </code>
+          </pre>
+        </section>
+      </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/plugin/highlight/highlight.min.js"></script>
+    <script>
+      Reveal.initialize({
+        controls: true,
+        progress: true,
+        history: true,
+        plugins: [RevealHighlight],
+        slideNumber: true,
+        autoAnimate: true,
+      });
+    </script>
+  </body>
+</html>
